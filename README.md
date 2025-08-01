@@ -13,7 +13,7 @@ A command-line tool that tests YouTube content accessibility across NordVPN serv
 YouTube has recently intensified its restrictions on ad blockers and VPN usage.  
 Some VPN IPs are now blocked from viewing content entirely, or trigger constant CAPTCHA and login prompts.  
 This script helps identify which NordVPN servers still work reliably for accessing specific YouTube videos.  
-useful for users seeking uninterrupted viewing, testing geo-blocking, or preserving privacy.
+Useful for users seeking uninterrupted viewing, testing geo-blocking, or preserving privacy.
 
 ## Requirements
 
@@ -29,6 +29,16 @@ useful for users seeking uninterrupted viewing, testing geo-blocking, or preserv
 Here you can copy all af them:
 ```bash
 curl yt-dlp nordvpn grep tr awk sed
+```
+
+## Installation
+
+Clone this repository:
+
+```bash
+git clone https://codeberg.org/marvin1099/nordvpn-youtube-tester.git
+cd nordvpn-youtube-tester
+chmod +x nordvpn-youtube-tester.sh
 ```
 
 ## Usage
@@ -49,13 +59,3 @@ It will:
 * Requires an active NordVPN subscription
 * Run `nordvpn login` before using the script
 * Make shure that `nordvpn c` also works
-
-## Installation
-
-Clone this repository:
-
-```bash
-git clone https://codeberg.org/marvin1099/nordvpn-youtube-tester.git
-cd nordvpn-youtube-tester
-chmod +x nordvpn-youtube-tester.sh
-```

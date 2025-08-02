@@ -35,6 +35,17 @@ if (( ${#MISSING_CMDS[@]} > 0 )); then
     exit 1
 fi
 
+# Check for the ping command
+if ! command -v "ping" &>/dev/null; then
+    echo "❌ Ping command missing. Exiting."
+    exit 1
+fi
+
+# Check for internet
+if ! ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1; then
+    echo "❌ No internet connection detected. Exiting."
+    exit 1
+fi
 
 # Get the public IP address
 IP=$("$CURL" -s "https://api.ipify.org")

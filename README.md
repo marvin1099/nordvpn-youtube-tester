@@ -62,14 +62,14 @@ With no server speed check
 ./nordvpn-youtube-tester.sh "" "" 0
 ```
 
-With 1080p speed check (5MB/s : 5 * 1024 * 1024)
+With 1080p speed check (5Mbps : 5MB * 1024 * 1024 / 8 = 655360 B/s)
 ```bash
-./nordvpn-youtube-tester.sh "" "" 5242880
+./nordvpn-youtube-tester.sh "" "" 655360
 ```
 
 With all args:
 ```bash
-./nordvpn-youtube-tester.sh Switzerland true 5242880
+./nordvpn-youtube-tester.sh Switzerland true 655360
 ```
 
 It will:

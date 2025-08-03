@@ -19,6 +19,10 @@ if [[ -n "$1" ]]; then
     SET_COUNTRY=$1
 fi
 
+if [[ -n "$2" ]]; then
+    CURRENT=1
+fi
+
 # List of required commands
 REQUIRED_CMDS=("$NORDVPN" "$YTDLP" "$CURL" "$GREP" "$TR" "$AWK" "$SED")
 
@@ -117,7 +121,7 @@ for i in $(seq 1 $MAX_TRIES); do
         fi
     fi
 
-    if [[ "$i" -eq 1 && "$(echo "$status" | "$GREP" "Status: Connected")" ]]; then
+    if [[ "$i" -eq 1 && "$(echo "$status" | "$GREP" "Status: Connected")" && -n "$CURRENT" ]]; then
         echo "    🔵 Using current connection..."
     else
         if [[ "$USE_SAVED_NEXT" -gt 0 && ${#SAVED_SERVERS[@]} -gt 0 ]]; then

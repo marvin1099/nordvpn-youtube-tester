@@ -96,9 +96,11 @@ CONNECTED_PREFIX=""
 
 try_server() {
     local server="$1"
-    echo "⏳ Connecting to server: $server"
-    "$NORDVPN" c "$server" >/dev/null 2>&1 &
-    sleep 4
+    if [[ -n "$server" ]]; then
+        echo "⏳ Connecting to server: $server"
+        "$NORDVPN" c "$server" >/dev/null 2>&1 &
+        sleep 4
+    fi
 
     # Wait for connection
     for attempt in {1..10}; do
@@ -149,6 +151,13 @@ for i in $(seq 1 $MAX_TRIES); do
 
     if [[ "$i" -eq 1 && "$(echo "$status" | "$GREP" "Status: Connected")" && -n "$CURRENT" ]]; then
         echo "    🔵 Using current connection..."
+        try_server || {
+            server_hostname=$(echo "$status" | "$AWK" -F': ' '/Hostname: / {print $2}')
+            server_name="${server_hostname%%.*}"
+            # remove if connection fails
+            "$SED" -i "/^$server_name$/d" "$WORKING_FILE"
+            continue
+        }
     else
         if [[ "$USE_SAVED_NEXT" -gt 0 && ${#SAVED_SERVERS[@]} -gt 0 ]]; then
             # Use only saved servers matching prefix
@@ -203,23 +212,14 @@ for i in $(seq 1 $MAX_TRIES); do
                 "$NORDVPN" connect >/dev/null 2>&1 &
             fi
 
-            # Wait for connection
-            for attempt in {1..10}; do
-                sleep 2
-                if "$NORDVPN" status | "$GREP" -q "Status: Connected"; then
-                    echo "    ✅ VPN connected."
-                    break
-                fi
-            done
-
-            if ! "$NORDVPN" status | "$GREP" -q "Status: Connected"; then
-                if [[ -n "$COUNTRY" ]]; then
-                    echo "    ❌ Could not connect to $COUNTRY server."
-                else
-                    echo "    ❌ Could not connect to random server."
-                fi
+            try_server || {
+                status="$("$NORDVPN" status)"
+                server_hostname=$(echo "$status" | "$AWK" -F': ' '/Hostname: / {print $2}')
+                server_name="${server_hostname%%.*}"
+                # remove if connection fails
+                "$SED" -i "/^$server_name$/d" "$WORKING_FILE"
                 continue
-            fi
+            }
         fi
     fi
 

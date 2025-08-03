@@ -89,7 +89,7 @@ echo "🔍 Searching for a NordVPN server that allows YouTube video access in $C
 mkdir -p "$(dirname "$WORKING_FILE")"
 touch "$WORKING_FILE"
 
-USE_SAVED_NEXT=-2 # try 3 random country servers (-2,-1,0)
+USE_SAVED_NEXT=-1 # try 2 random country servers (-1,0)
 SAVED_SERVERS=($(<"$WORKING_FILE"))
 SAVED_INDEX=${RANDOM:-0}
 CONNECTED_PREFIX=""
@@ -116,14 +116,19 @@ try_server() {
 
     if [[ -n "$NEEDED_SPEED" && "$NEEDED_SPEED" -gt 0 ]]; then
         echo "    📶 Testing server speed..."
-        SPEED_BPS=$("$CURL" -s -w "%{speed_download}" -o /dev/null --max-time 8 https://speed.hetzner.de/100MB.bin)
+        SPEED_BPS=$("$CURL" -s -w "%{speed_download}" -o /dev/null --max-time 8 "https://speed.cloudflare.com/__down?bytes=10000000")
 
         if [[ -z "$SPEED_BPS" || "$SPEED_BPS" -lt $NEEDED_SPEED ]]; then
-            echo "    ❌ Server too slow (${SPEED_BPS:-0} B/s)."
+            if [ "${SPEED_BPS:-0}" -lt 1024 ]; then
+                echo "    ❌ Server too slow (${SPEED_BPS} B/s)."
+            else
+                SPEED_KB=$((SPEED_BPS / 1024))
+                echo "    ❌ Server too slow (${SPEED_KB} KB/s)."
+            fi
             return 2
         fi
 
-        echo "    ✅ Server speed OK ($((SPEED_BPS / 1000)) KB/s)"
+        echo "    ✅ Server speed OK ($((SPEED_BPS / 1024)) KB/s)"
     fi
 
     return 0

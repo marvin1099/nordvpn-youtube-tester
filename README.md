@@ -57,9 +57,19 @@ With using the current connection (check if the active server already works for 
 ./nordvpn-youtube-tester.sh "" true
 ```
 
-With both:
+With no server speed check
 ```bash
-./nordvpn-youtube-tester.sh Switzerland true
+./nordvpn-youtube-tester.sh "" "" 0
+```
+
+With 1080p speed check (5MB/s : 5 * 1024 * 1024)
+```bash
+./nordvpn-youtube-tester.sh "" "" 5242880
+```
+
+With all args:
+```bash
+./nordvpn-youtube-tester.sh Switzerland true 5242880
 ```
 
 It will:

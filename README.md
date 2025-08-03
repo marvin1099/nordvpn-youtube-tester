@@ -47,9 +47,14 @@ chmod +x nordvpn-youtube-tester.sh
 ./nordvpn-youtube-tester.sh
 ```
 
+With a custom country:
+```bash
+./nordvpn-youtube-tester.sh Switzerland
+```
+
 It will:
 
-* Connect to a random server in your current country
+* Connect to a random server in your current country (or set country)
 * Test if the video is accessible from that region
 * Retry until a working server is found
 * Print the working server

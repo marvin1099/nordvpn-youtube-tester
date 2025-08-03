@@ -52,6 +52,16 @@ With a custom country:
 ./nordvpn-youtube-tester.sh Switzerland
 ```
 
+With using the current connection (check if the active server already works for youtube)
+```bash
+./nordvpn-youtube-tester.sh "" true
+```
+
+With both:
+```bash
+./nordvpn-youtube-tester.sh Switzerland true
+```
+
 It will:
 
 * Connect to a random server in your current country (or set country)

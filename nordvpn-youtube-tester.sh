@@ -60,7 +60,7 @@ if ! ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1; then
     exit 1
 fi
 
-if [[ -n "$SET_COUNTRY" ]]; then
+if [[ -z "$SET_COUNTRY" ]]; then
     # Get the public IP address
     IP=$("$CURL" -s "https://api.ipify.org")
 

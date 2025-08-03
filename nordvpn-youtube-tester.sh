@@ -23,6 +23,11 @@ if [[ -n "$2" ]]; then
     CURRENT=1
 fi
 
+if [[ -n "$3" ]]; then
+    #threshold: ~375 KB/s = ~3 Mbps for 720p streaming
+    NEEDED_SPEED=${3:-375000}
+fi
+
 # List of required commands
 REQUIRED_CMDS=("$NORDVPN" "$YTDLP" "$CURL" "$GREP" "$TR" "$AWK" "$SED")
 
@@ -100,12 +105,28 @@ try_server() {
         sleep 2
         if "$NORDVPN" status | "$GREP" -q "Status: Connected"; then
             echo "    ✅ VPN connected."
-            return 0
+            break
         fi
     done
 
-    echo "    ❌ Failed to establish VPN connection to $server."
-    return 1
+    if ! "$NORDVPN" status | "$GREP" -q "Status: Connected"; then
+        echo "    ❌ Failed to establish VPN connection to $server."
+        return 1
+    fi
+
+    if [[ -n "$NEEDED_SPEED" && "$NEEDED_SPEED" -gt 0 ]]; then
+        echo "    📶 Testing server speed..."
+        SPEED_BPS=$("$CURL" -s -w "%{speed_download}" -o /dev/null --max-time 8 https://speed.hetzner.de/100MB.bin)
+
+        if [[ -z "$SPEED_BPS" || "$SPEED_BPS" -lt $NEEDED_SPEED ]]; then
+            echo "    ❌ Server too slow (${SPEED_BPS:-0} B/s)."
+            return 2
+        fi
+
+        echo "    ✅ Server speed OK ($((SPEED_BPS / 1000)) KB/s)"
+    fi
+
+    return 0
 }
 
 for i in $(seq 1 $MAX_TRIES); do

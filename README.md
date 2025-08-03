@@ -62,7 +62,7 @@ With no server speed check
 ./nordvpn-youtube-tester.sh "" "" 0
 ```
 
-With 1080p speed check (5Mbps : 5MB * 1024 * 1024 / 8 = 655360 B/s)
+With 1080p speed check (5Mbps * 1024 * 1024 / 8 = 655360 B/s)
 ```bash
 ./nordvpn-youtube-tester.sh "" "" 655360
 ```

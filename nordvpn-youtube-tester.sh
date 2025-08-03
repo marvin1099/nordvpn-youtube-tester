@@ -15,6 +15,10 @@ TR="tr"
 AWK="awk"
 SED="sed"
 
+if [[ -n "$1" ]]; then
+    SET_COUNTRY=$1
+fi
+
 # List of required commands
 REQUIRED_CMDS=("$NORDVPN" "$YTDLP" "$CURL" "$GREP" "$TR" "$AWK" "$SED")
 
@@ -47,11 +51,15 @@ if ! ping -c 1 -W 2 1.1.1.1 >/dev/null 2>&1; then
     exit 1
 fi
 
-# Get the public IP address
-IP=$("$CURL" -s "https://api.ipify.org")
+if [[ -n "$SET_COUNTRY" ]]; then
+    # Get the public IP address
+    IP=$("$CURL" -s "https://api.ipify.org")
 
-# Get the country information using a geolocation API
-COUNTRY=$("$CURL" -s "https://ipapi.co/${IP}/country_name/")
+    # Get the country information using a geolocation API
+    COUNTRY=$("$CURL" -s "https://ipapi.co/${IP}/country_name/")
+else
+    COUNTRY=$SET_COUNTRY
+fi
 
 FALLBACK_COUNTRY="${FALLBACK_COUNTRY//\_/ }"
 COUNTRY="${COUNTRY//\_/ }"
@@ -72,11 +80,10 @@ echo "🔍 Searching for a NordVPN server that allows YouTube video access in $C
 mkdir -p "$(dirname "$WORKING_FILE")"
 touch "$WORKING_FILE"
 
-USE_SAVED_NEXT=true
+USE_SAVED_NEXT=-2 # try 3 random country servers (-2,-1,0)
 SAVED_SERVERS=($(<"$WORKING_FILE"))
-SAVED_INDEX=0
+SAVED_INDEX=${RANDOM:-0}
 CONNECTED_PREFIX=""
-USE_SAVED_NEXT=true
 
 try_server() {
     local server="$1"
@@ -113,11 +120,13 @@ for i in $(seq 1 $MAX_TRIES); do
     if [[ "$i" -eq 1 && "$(echo "$status" | "$GREP" "Status: Connected")" ]]; then
         echo "    🔵 Using current connection..."
     else
-        if [[ "$USE_SAVED_NEXT" == true && ${#SAVED_SERVERS[@]} -gt 0 ]]; then
+        if [[ "$USE_SAVED_NEXT" -gt 0 && ${#SAVED_SERVERS[@]} -gt 0 ]]; then
             # Use only saved servers matching prefix
             SERVER=""
             if [[ -n "$CONNECTED_PREFIX" ]]; then
-                start_index=$SAVED_INDEX
+                if [[ -z $start_index ]]; then
+                    start_index=$(( SAVED_INDEX % ${#SAVED_SERVERS[@]} ))
+                fi
                 while [[ -z "$SERVER" ]]; do
                     candidate="${SAVED_SERVERS[$SAVED_INDEX]}"
                     SAVED_INDEX=$(( (SAVED_INDEX + 1) % ${#SAVED_SERVERS[@]} ))
@@ -134,12 +143,20 @@ for i in $(seq 1 $MAX_TRIES); do
                 done
                 if [[ -n "$SERVER" ]]; then
                     # next time use a country server
-                    USE_SAVED_NEXT=false
+                    if [[ $USE_SAVED_NEXT -gt 2 ]]; then
+                        USE_SAVED_NEXT=$((USE_SAVED_NEXT - 1))
+                    elif [[ $USE_SAVED_NEXT -eq 1 ]]; then
+                        USE_SAVED_NEXT=0 # if set lower would use more random servers
+                    fi
                 fi
             fi
         else
             SERVER=""
-            USE_SAVED_NEXT=true
+            if [[ $USE_SAVED_NEXT -lt 0 ]]; then
+                USE_SAVED_NEXT=$((USE_SAVED_NEXT + 1))
+            elif [[ $USE_SAVED_NEXT -eq 0 ]]; then
+                USE_SAVED_NEXT=1 # if set higher would use more saved servers
+            fi
         fi
 
         #"$NORDVPN" disconnect >/dev/null 2>&1

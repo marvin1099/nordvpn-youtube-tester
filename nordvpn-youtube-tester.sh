@@ -24,8 +24,8 @@ if [[ -n "$2" ]]; then
 fi
 
 if [[ -n "$3" ]]; then
-    #threshold: ~375 KB/s = ~3 Mbps for 720p streaming
-    NEEDED_SPEED=${3:-375000}
+    #Threshold in B/s: ~393000 B/s = ~393 Kb/s = ~3 Mbps for 720p streaming
+    NEEDED_SPEED=${3:-393000}
 fi
 
 # List of required commands
